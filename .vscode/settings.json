@@ -1,3 +1,7 @@
 {
-    "github.copilot.chat.terminalCommand.autoRun": true
+    "github.copilot.chat.terminalCommand.autoRun": true,
+    "yaml.schemas": {
+        "./templates/schemas/project-template.schema.json": ["templates/project-template.yaml", "data/*.yaml"],
+        "./templates/schemas/wiki-config.schema.json": ["templates/wiki-config.yaml"]
+    }
 }

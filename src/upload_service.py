@@ -2,10 +2,17 @@
 Upload service for Azure DevOps work item creation from YAML data.
 
 Walks a YAML project hierarchy (epics → features → stories → tasks)
-and uploads each item via BaseWorkItemService, skipping duplicates.
+and uploads each item via DevOpsClient, skipping duplicates.
+
+Field assignment follows the Pydantic models in ``models.py``:
+
+* **Epics / Features** — ``title``, ``description``, ``iteration_path``
+* **User Stories** — adds ``story_points``, ``acceptance_criteria``
+* **Tasks** — adds ``estimate``
 """
 
 from .devops_client import DevOpsClient
+from .models import build_work_item_data
 
 
 def _create_and_track(svc, wi_type, data, parent_id=None):
@@ -44,18 +51,22 @@ def _print_result(result):
     print(f"  [{icon}] {result['type']:12s} | {result['title'][:50]:50s} | {result.get('message', '')}")
 
 
-def _build_data(item: dict) -> dict:
-    """Build a work-item data dict from a YAML item, including only non-empty fields."""
-    data: dict = {"title": item["title"]}
+def _build_data(item: dict, work_item_type: str) -> dict:
+    """Build a work-item data dict from a YAML item.
+
+    Only includes the fields that are valid for *work_item_type* by
+    delegating to :func:`models.build_work_item_data`.
+    """
+    raw: dict = {"title": item["title"]}
     for key in ("description", "acceptance_criteria"):
         if item.get(key):
-            data[key] = item[key]
+            raw[key] = item[key]
     for key in ("story_points", "estimate"):
         if item.get(key) is not None:
-            data[key] = item[key]
+            raw[key] = item[key]
     if item.get("iteration_path"):
-        data["iteration_path"] = item["iteration_path"]
-    return data
+        raw["iteration_path"] = item["iteration_path"]
+    return build_work_item_data(work_item_type, raw)
 
 
 def upload_from_yaml(data, org, project, pat):
@@ -64,25 +75,25 @@ def upload_from_yaml(data, org, project, pat):
     results = []
 
     for epic in data.get("epics", []):
-        result = _create_and_track(svc, "Epic", _build_data(epic))
+        result = _create_and_track(svc, "Epic", _build_data(epic, "Epic"))
         results.append(result)
         _print_result(result)
         epic_id = _resolve_id(svc, result, epic["title"])
 
         for feat in epic.get("features", []):
-            result = _create_and_track(svc, "Feature", _build_data(feat), epic_id)
+            result = _create_and_track(svc, "Feature", _build_data(feat, "Feature"), epic_id)
             results.append(result)
             _print_result(result)
             feat_id = _resolve_id(svc, result, feat["title"])
 
             for story in feat.get("stories", []):
-                result = _create_and_track(svc, "User Story", _build_data(story), feat_id)
+                result = _create_and_track(svc, "User Story", _build_data(story, "User Story"), feat_id)
                 results.append(result)
                 _print_result(result)
                 story_id = _resolve_id(svc, result, story["title"])
 
                 for task in story.get("tasks", []):
-                    result = _create_and_track(svc, "Task", _build_data(task), story_id)
+                    result = _create_and_track(svc, "Task", _build_data(task, "Task"), story_id)
                     results.append(result)
                     _print_result(result)
 

@@ -55,6 +55,7 @@ from .template_service import (
     slugify,
 )
 from .upload_service import upload_from_yaml
+from .models import build_work_item_data
 
 # ---------------------------------------------------------------------------
 # Bootstrap
@@ -326,28 +327,39 @@ def create_new_backlog(
     """
     Create a new work item (backlog item) in Azure DevOps.
 
+    Only fields appropriate for the given *work_item_type* are persisted:
+
+    * **Epic / Feature** — title, description, iteration_path.
+    * **User Story** — adds story_points and acceptance_criteria.
+    * **Task** — adds estimate (hours).
+
+    Fields that don't belong to the chosen type are silently ignored.
+
     Args:
         work_item_type: One of "Epic", "Feature", "User Story", or "Task".
         title: The work item title.
         description: Optional description text.
-        acceptance_criteria: Optional acceptance criteria (User Story).
-        story_points: Optional story points (User Story).
-        estimate: Optional effort/estimate in hours (Task).
+        acceptance_criteria: Optional acceptance criteria (User Story only).
+        story_points: Optional story points (User Story only).
+        estimate: Optional effort/estimate in hours (Task only).
         parent_id: Optional parent work item ID for hierarchy linking.
         iteration_path: Optional iteration path (e.g. "MyProject\\Sprint 1").
     """
     client = _get_client()
-    data: dict = {"title": title}
+    raw: dict = {"title": title}
     if description:
-        data["description"] = description
+        raw["description"] = description
     if acceptance_criteria:
-        data["acceptance_criteria"] = acceptance_criteria
+        raw["acceptance_criteria"] = acceptance_criteria
     if story_points is not None:
-        data["story_points"] = story_points
+        raw["story_points"] = story_points
     if estimate is not None:
-        data["estimate"] = estimate
+        raw["estimate"] = estimate
     if iteration_path is not None:
-        data["iteration_path"] = iteration_path
+        raw["iteration_path"] = iteration_path
+
+    # Filter to only the fields valid for this work-item type
+    data = build_work_item_data(work_item_type, raw)
 
     try:
         result = client.create(work_item_type, data, parent_id)

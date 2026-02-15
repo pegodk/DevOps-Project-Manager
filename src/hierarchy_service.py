@@ -203,21 +203,17 @@ def format_tree_text(tree: list[dict], indent: int = 0) -> list[str]:
 def tree_to_yaml_structure(tree: list[dict]) -> dict:
     """Convert a tree to a YAML-compatible dict matching the project-designer template format.
 
-    Every work-item level (epic, feature, story, task) carries **all** available
-    fields.  Fields that are empty / ``None`` are omitted so the YAML stays
-    clean.  When creating a project from scratch only a handful of fields are
-    required (``title`` and optionally ``description``); the rest are populated
-    when reading back from Azure DevOps via ``get_project_status``.
+    Every work-item level carries **only** the fields appropriate for its
+    type, following the Pydantic models in ``models.py``:
 
-    Fields per item (all optional except ``title``):
+    * **Epic / Feature** — ``title``, ``description``, ``id``, ``state``,
+      ``iteration_path`` (never ``story_points`` or ``estimate``).
+    * **User Story** — adds ``story_points`` and ``acceptance_criteria``
+      (never ``estimate``).
+    * **Task** — adds ``estimate`` (never ``story_points`` or
+      ``acceptance_criteria``).
 
-    * ``id``                  – Azure DevOps work-item ID (read-only, from API)
-    * ``state``               – Work-item state, e.g. "New", "Active", "Closed"
-    * ``description``         – Rich-text description
-    * ``acceptance_criteria`` – Acceptance criteria (rich text)
-    * ``story_points``        – Story-point estimate (numeric)
-    * ``estimate``            – Hour estimate (numeric)
-    * ``iteration_path``      – Iteration / sprint path
+    Fields that are empty / ``None`` are omitted so the YAML stays clean.
     """
 
     # Mapping: work-item type → (child collection key, expected child type)
@@ -231,7 +227,7 @@ def tree_to_yaml_structure(tree: list[dict]) -> dict:
         """Build a single YAML item dict from a tree node, recursing into children."""
         item: dict = {"title": node["title"]}
 
-        # Optional scalar fields – only include when non-empty
+        # Optional scalar fields — only include when non-empty
         if node.get("id"):
             item["id"] = node["id"]
         if node.get("state"):
@@ -241,19 +237,23 @@ def tree_to_yaml_structure(tree: list[dict]) -> dict:
         if desc:
             item["description"] = desc
 
-        ac = clean_html(node.get("acceptance_criteria", ""))
-        if ac:
-            item["acceptance_criteria"] = ac
+        # Type-specific fields
+        wi_type = node.get("type", "")
+        if wi_type == "User Story":
+            ac = clean_html(node.get("acceptance_criteria", ""))
+            if ac:
+                item["acceptance_criteria"] = ac
+            if node.get("story_points") is not None:
+                item["story_points"] = node["story_points"]
+        elif wi_type == "Task":
+            if node.get("estimate") is not None:
+                item["estimate"] = node["estimate"]
 
-        if node.get("story_points") is not None:
-            item["story_points"] = node["story_points"]
-        if node.get("estimate") is not None:
-            item["estimate"] = node["estimate"]
         if node.get("iteration_path"):
             item["iteration_path"] = node["iteration_path"]
 
         # Recursively build children if this type has a child collection
-        config = _CHILDREN_CONFIG.get(node.get("type", ""))
+        config = _CHILDREN_CONFIG.get(wi_type)
         if config:
             child_key, child_type = config
             kids = [

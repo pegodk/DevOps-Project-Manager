@@ -1,0 +1,276 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://devops-project/schemas/project-template.schema.json",
+  "title": "Azure DevOps Project Template",
+  "description": "Schema for validating YAML project templates that define Azure DevOps work item hierarchies (Epics → Features → Stories → Tasks).",
+  "type": "object",
+  "required": ["epics"],
+  "properties": {
+    "template": {
+      "type": "object",
+      "description": "Template metadata.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Template identifier (e.g. 'project-template')."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the template."
+        },
+        "version": {
+          "type": "string",
+          "description": "Template version (semver recommended).",
+          "pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "epics": {
+      "type": "array",
+      "description": "Top-level work items representing major project initiatives.",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/epic" }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "epic": {
+      "type": "object",
+      "description": "An Epic work item — the highest level of the hierarchy.",
+      "required": ["title", "features"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Epic title. Used as the parent reference for child features.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Business-oriented description of the epic's scope and value."
+        },
+        "id": {
+          "type": "integer",
+          "description": "Azure DevOps work item ID (populated when reading from API)."
+        },
+        "state": {
+          "type": "string",
+          "description": "Work item state (e.g. 'New', 'Active', 'Closed'). Populated when reading from API."
+        },
+        "acceptance_criteria": {
+          "type": "string",
+          "description": "Acceptance criteria (populated when reading from API)."
+        },
+        "story_points": {
+          "type": "number",
+          "description": "Story point estimate (populated when reading from API)."
+        },
+        "estimate": {
+          "type": "number",
+          "description": "Effort estimate in hours (populated when reading from API)."
+        },
+        "iteration_path": {
+          "type": "string",
+          "description": "Azure DevOps iteration path (e.g. 'ProjectName\\Sprint 1')."
+        },
+        "features": {
+          "type": "array",
+          "description": "Features belonging to this epic.",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/feature" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "feature": {
+      "type": "object",
+      "description": "A Feature work item — a capability or component within an epic.",
+      "required": ["title", "stories"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Feature title. May contain {{name}} placeholders for parameterized features.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the feature's scope and purpose."
+        },
+        "id": {
+          "type": "integer",
+          "description": "Azure DevOps work item ID (populated when reading from API)."
+        },
+        "state": {
+          "type": "string",
+          "description": "Work item state (e.g. 'New', 'Active', 'Closed'). Populated when reading from API."
+        },
+        "acceptance_criteria": {
+          "type": "string",
+          "description": "Acceptance criteria (populated when reading from API)."
+        },
+        "story_points": {
+          "type": "number",
+          "description": "Story point estimate (populated when reading from API)."
+        },
+        "estimate": {
+          "type": "number",
+          "description": "Effort estimate in hours (populated when reading from API)."
+        },
+        "iteration_path": {
+          "type": "string",
+          "description": "Azure DevOps iteration path (e.g. 'ProjectName\\Sprint 1')."
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "When true, the feature can be excluded via the 'exclude' parameter.",
+          "default": false
+        },
+        "parameterized": {
+          "type": "boolean",
+          "description": "When true, the feature is duplicated per instance with {{name}} replaced.",
+          "default": false
+        },
+        "default_instances": {
+          "type": "array",
+          "description": "Default instance names for parameterized features. Only valid when parameterized is true.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "stories": {
+          "type": "array",
+          "description": "User stories belonging to this feature.",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/story" }
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": { "parameterized": { "const": true } },
+        "required": ["parameterized"]
+      },
+      "then": {
+        "required": ["title", "stories", "default_instances"]
+      }
+    },
+    "story": {
+      "type": "object",
+      "description": "A User Story work item.",
+      "required": ["title", "description", "acceptance_criteria"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Story title. May contain {{ name }} placeholders for parameterized stories.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Story description, ideally in 'As a [role], I want [capability], so that [benefit]' format.",
+          "minLength": 1
+        },
+        "acceptance_criteria": {
+          "type": "string",
+          "description": "Bullet-pointed acceptance criteria for the story. Converted to HTML on upload.",
+          "minLength": 1
+        },
+        "id": {
+          "type": "integer",
+          "description": "Azure DevOps work item ID (populated when reading from API)."
+        },
+        "state": {
+          "type": "string",
+          "description": "Work item state (e.g. 'New', 'Active', 'Closed'). Populated when reading from API."
+        },
+        "estimate": {
+          "type": "number",
+          "description": "Effort estimate in hours (populated when reading from API)."
+        },
+        "story_points": {
+          "type": "integer",
+          "description": "Estimated complexity using the Fibonacci scale.",
+          "enum": [1, 2, 3, 5, 8, 13, 21]
+        },
+        "iteration_path": {
+          "type": "string",
+          "description": "Azure DevOps iteration path (e.g. 'ProjectName\\Sprint 1')."
+        },
+        "parameterized": {
+          "type": "boolean",
+          "description": "When true, story is duplicated per instance within its feature.",
+          "default": false
+        },
+        "instance_key": {
+          "type": "string",
+          "description": "Label for the instance group (e.g. 'Dimension', 'Fact'). Required when parameterized is true."
+        },
+        "default_instances": {
+          "type": "array",
+          "description": "Default instance names for parameterized stories.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "tasks": {
+          "type": "array",
+          "description": "Tasks belonging to this story.",
+          "items": { "$ref": "#/definitions/task" }
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": { "parameterized": { "const": true } },
+        "required": ["parameterized"]
+      },
+      "then": {
+        "required": ["title", "description", "acceptance_criteria", "instance_key", "default_instances"]
+      }
+    },
+    "task": {
+      "type": "object",
+      "description": "A Task work item — the lowest level of the hierarchy.",
+      "required": ["title", "estimate"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Task title describing the specific action.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional detailed description of the task."
+        },
+        "id": {
+          "type": "integer",
+          "description": "Azure DevOps work item ID (populated when reading from API)."
+        },
+        "state": {
+          "type": "string",
+          "description": "Work item state (e.g. 'New', 'Active', 'Closed'). Populated when reading from API."
+        },
+        "acceptance_criteria": {
+          "type": "string",
+          "description": "Acceptance criteria (populated when reading from API)."
+        },
+        "story_points": {
+          "type": "number",
+          "description": "Story point estimate (populated when reading from API)."
+        },
+        "estimate": {
+          "type": "number",
+          "description": "Effort estimate in hours.",
+          "enum": [1, 2, 4, 8, 16]
+        },
+        "iteration_path": {
+          "type": "string",
+          "description": "Azure DevOps iteration path (e.g. 'ProjectName\\Sprint 1')."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

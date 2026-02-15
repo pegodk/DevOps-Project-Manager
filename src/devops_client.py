@@ -459,42 +459,49 @@ class DevOpsClient:
         return "".join(html_parts)
 
     def _create_work_item(self, work_item_type, data, parent_id=None):
-        """Create a work item in Azure DevOps."""
+        """Create a work item in Azure DevOps.
+
+        Only fields appropriate for *work_item_type* are sent to the API.
+        See :func:`models.build_work_item_data` for the allowed-field mapping.
+        """
+        # Filter data to only include type-appropriate fields
+        filtered = build_work_item_data(work_item_type, data)
+
         # If no credentials configured, use in-memory store (for testing)
         if not self.organization or not self.pat:
-            return self._create_in_memory(work_item_type, data, parent_id)
+            return self._create_in_memory(work_item_type, filtered, parent_id)
         
         url = f"{self.base_url}/workitems/${work_item_type}?api-version={self.api_version}"
         
         body = [
-            {"op": "add", "path": "/fields/System.Title", "value": data.get("title", "")},
+            {"op": "add", "path": "/fields/System.Title", "value": filtered.get("title", "")},
         ]
         
-        if data.get("description"):
+        if filtered.get("description"):
             body.append({"op": "add", "path": "/fields/System.Description",
-                         "value": self._to_html(data["description"])})
+                         "value": self._to_html(filtered["description"])})
 
-        if data.get("acceptance_criteria"):
+        if filtered.get("acceptance_criteria"):
             body.append({"op": "add", "path": "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
-                         "value": self._to_html(data["acceptance_criteria"])})
+                         "value": self._to_html(filtered["acceptance_criteria"])})
 
-        if data.get("estimate") and str(data["estimate"]).strip():
+        if filtered.get("estimate") and str(filtered["estimate"]).strip():
             try:
                 body.append({"op": "add", "path": "/fields/Microsoft.VSTS.Scheduling.Effort",
-                             "value": float(data["estimate"])})
+                             "value": float(filtered["estimate"])})
             except (ValueError, TypeError):
                 pass
 
-        if data.get("story_points") and str(data["story_points"]).strip():
+        if filtered.get("story_points") and str(filtered["story_points"]).strip():
             try:
                 body.append({"op": "add", "path": "/fields/Microsoft.VSTS.Scheduling.StoryPoints",
-                             "value": float(data["story_points"])})
+                             "value": float(filtered["story_points"])})
             except (ValueError, TypeError):
                 pass
 
-        if data.get("iteration_path"):
+        if filtered.get("iteration_path"):
             body.append({"op": "add", "path": "/fields/System.IterationPath",
-                         "value": data["iteration_path"]})
+                         "value": filtered["iteration_path"]})
         
         if parent_id:
             body.append({
@@ -572,7 +579,11 @@ class DevOpsClient:
     
     # In-memory methods for testing without Azure DevOps connection
     def _create_in_memory(self, work_item_type, data, parent_id=None):
-        """Create work item in memory (for testing)."""
+        """Create work item in memory (for testing).
+
+        *data* is expected to have been pre-filtered through
+        ``build_work_item_data`` so only type-appropriate fields remain.
+        """
         item_id = self._next_id
         self._next_id += 1
         
@@ -585,6 +596,17 @@ class DevOpsClient:
             "state": "New",
             "iteration_path": data.get("iteration_path", ""),
         }
+
+        # Store only the fields valid for this work-item type
+        if work_item_type == "User Story":
+            if data.get("story_points") is not None:
+                item["story_points"] = data["story_points"]
+            if data.get("acceptance_criteria"):
+                item["acceptance_criteria"] = data["acceptance_criteria"]
+        elif work_item_type == "Task":
+            if data.get("estimate") is not None:
+                item["estimate"] = data["estimate"]
+
         self._items[item_id] = item
         return item
     

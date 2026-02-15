@@ -1,9 +1,21 @@
 {
-  "servers": {
-    "devops-mcp": {
-      "type": "stdio",
-      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "src.mcp_server"]
-    }
-  }
+	"servers": {
+		"devops-mcp": {
+			"type": "stdio",
+			"command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"src.mcp_server"
+			]
+		},
+		"ado": {
+			"type": "stdio",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"foreach ($line in Get-Content '${workspaceFolder}\\.env') { if ($line -match '^([^#=]+)=(.*)$') { Set-Item \"env:$($Matches[1].Trim())\" $Matches[2].Trim() } }; npx -y @azure-devops/mcp $env:AZURE_DEVOPS_ORG_NAME"
+			]
+		}
+	}
 }
