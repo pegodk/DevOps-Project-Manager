@@ -62,6 +62,7 @@ devops-project/
 │               └── yaml-template-guide.md
 ├── src/
 │   ├── __init__.py            # Re-exports all public APIs
+│   ├── models.py              # Pydantic models & field-filtering gatekeeper
 │   ├── mcp_server.py          # MCP server — exposes 13 tools
 │   ├── devops_client.py       # Azure DevOps REST API client
 │   ├── hierarchy_service.py   # Work item hierarchy fetch, tree, summary
@@ -74,6 +75,7 @@ devops-project/
 │   ├── test_mcp_server.py
 │   ├── test_template_service.py
 │   ├── test_upload_service.py
+│   ├── test_models.py
 │   └── test_mcp_server.py
 ├── templates/
 │   └── project-template.yaml      # Lakehouse project template
@@ -249,6 +251,22 @@ update_iteration(
 subscribe_iterations()
 ```
 
+## Data Models
+
+Work-item fields are enforced per type via Pydantic models in `src/models.py`. The `build_work_item_data()` gatekeeper strips fields that don't belong to a given type before any API call or in-memory storage.
+
+| Field | Epic | Feature | User Story | Task |
+|---|:---:|:---:|:---:|:---:|
+| `title` | ✔ | ✔ | ✔ | ✔ |
+| `description` | ✔ | ✔ | ✔ | ✔ |
+| `state` | ✔ | ✔ | ✔ | ✔ |
+| `iteration_path` | ✔ | ✔ | ✔ | ✔ |
+| `story_points` | — | — | ✔ | — |
+| `acceptance_criteria` | — | — | ✔ | — |
+| `estimate` | — | — | — | ✔ |
+
+Models: `EpicItem`, `FeatureItem`, `StoryItem`, `TaskItem`, `ProjectData`.
+
 ### Services API
 
 The `src/` package exposes reusable service modules:
@@ -256,6 +274,8 @@ The `src/` package exposes reusable service modules:
 ```python
 from src import (
     DevOpsClient,
+    EpicItem, FeatureItem, StoryItem, TaskItem, ProjectData,
+    WORK_ITEM_MODELS, build_work_item_data,
     load_template, expand_all_features, save_yaml, lint_yaml,
     validate_template, count_work_items, apply_instance_overrides,
     exclude_features, slugify,

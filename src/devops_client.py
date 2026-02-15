@@ -5,6 +5,8 @@ Azure DevOps REST API client for work item operations.
 import requests
 from requests.auth import HTTPBasicAuth
 
+from .models import build_work_item_data
+
 
 class DevOpsClient:
     """Client for Azure DevOps work item CRUD operations."""
