@@ -1,0 +1,544 @@
+# =============================================================================
+# Project Template
+# =============================================================================
+# A complete Azure DevOps work item hierarchy for establishing a foundational
+# Lakehouse data platform.
+#
+# Delivery Phases:
+#   1. Firm Foundation        - Business assessment, solution design, UAT, change
+#                               management. Relatively fixed in scope.
+#   2. Cloud Infrastructure    - Cloud infra, CI/CD, lakehouse framework.
+#                               Optional: client may already have infra.
+#   3. Data Source Integration  - Data ingestion from source systems (SQL Server,
+#                               SharePoint, SAP, Salesforce, etc.) via ADF,
+#                               Fabric, or Databricks. Parameterized per source.
+#   4. Data Modeling Layer        - Dimensional modeling (Kimball star schema),
+#                               (dimensions & facts). Optional but usually needed.
+#   5. Semantic Layer          - Measures, relationships, hierarchies, RLS.
+#                               Usually in Fabric/Tabular Editor or Databricks
+#                               metric views. Optional but usually needed for BI.
+#   6. Presentation Layer      - Reports, dashboards, apps in Power BI,
+#                               Databricks, Streamlit, etc. Parameterized per
+#                               report/dashboard. Optional.
+#
+# Structure:
+#   epic → features → stories → tasks (nested hierarchy)
+#   Parent-child relationships are derived from the nesting structure.
+#
+# Feature Flags:
+#   parameterized: true  - Feature is duplicated per instance ({{name}} replaced)
+#   optional: true       - Feature can be excluded based on project scope
+# =============================================================================
+
+template:
+  name: project-template
+  description: >
+    Establish the foundational Lakehouse data platform, including infrastructure,
+    initial data ingestion pipelines, curated and semantic data models, reporting,
+    governance, and operational processes, to enable analytics and business insights.
+  version: "1.0"
+
+epics:
+  - title: "Data Platform - Phase 1"
+    description: >
+      Establish the foundational Lakehouse data platform, including infrastructure,
+      initial data ingestion pipelines, curated and semantic data models, reporting,
+      governance, and operational processes, to enable analytics and business insights.
+
+    features:
+      # =====================================================================
+      # Feature 1: Firm Foundation
+      # =====================================================================
+      - title: "Firm Foundation"
+        optional: true
+        description: >
+          Establish the strategic and organizational foundation for the data platform,
+          covering business assessment, solution design, UAT processes, and change
+          management to ensure alignment, quality, and adoption.
+        stories:
+          # -----------------------------------------------------------------
+          # Story: Business Assessment
+          # -----------------------------------------------------------------
+          - title: "Business Assessment"
+            story_points: 8
+            description: |
+              As a project lead, I want to evaluate business requirements, user needs,
+              data sources, and performance expectations so that the Lakehouse solution
+              aligns with organizational goals and delivers value.
+
+              Deliverables:
+              1. Business needs — Capture business needs from stakeholders, review and validate with business owners, and prioritize according to impact and urgency. Topics: pain points, product fit, data storage needs, governance, budget.
+              2. User personas — Define user personas (analyst, executive, data scientist, etc.) with goals, pain points, and usage patterns. Validate with stakeholder interviews.
+              3. Application landscape — Document the application landscape including dependencies between systems, data exchange mechanisms, and create a landscape diagram.
+              4. Performance requirements — Assess and document application performance requirements and data transfer requirements. Capture query SLAs, data freshness/latency, and peak load scenarios.
+              5. Skilling plan — Define a skilling plan identifying training needs, materials, schedule, and ownership for delivering training to team and users.
+              6. Data needs — Capture data needs by translating business questions into data requirements, identifying critical data elements, and mapping to source systems.
+              7. Networking requirements — Define and document networking requirements including IP addressing, connectivity, DNS, NSG rules, private endpoints, routing and peering design.
+              8. Security and compliance needs — Define security and compliance requirements including IAM, encryption, and regulatory controls (GDPR, ISO 27001). Implement RBAC and least-privilege principles.
+            acceptance_criteria: |
+              • All deliverables are documented and stored in the agreed repository.
+              • Deliverables are reviewed and signed off by relevant stakeholders.
+              • Open questions or risks are logged and assigned owners.
+
+          # -----------------------------------------------------------------
+          # Story: Solution Design
+          # -----------------------------------------------------------------
+          - title: "Solution Design"
+            story_points: 13
+            description: |
+              As an architect, I want to create a detailed design of the Lakehouse
+              architecture so that ingestion pipelines, storage layers, data models,
+              semantic models, and reporting frameworks are well-defined before
+              implementation.
+
+              Deliverables:
+              1. User roles — Define user roles (admin, viewer, contributor), align with governance policies, and document access control needs.
+              2. Data sources — Identify all required source systems, document connection details, clarify data ownership, and confirm access for development.
+              3. Data migration approach — Define data migration strategy (full load, phased, or hybrid), create quality/reconciliation plan, and define cutover approach.
+              4. Ingestion engine — Evaluate ingestion tool options (ADF, Databricks, Fabric), document decision criteria, and complete POC or benchmark if required.
+              5. Data storage and format — Define storage layers (bronze, silver, gold), choose file formats (Delta, Parquet), and document retention/partitioning strategy.
+              6. Naming convention — Create naming standards for tables, columns, and pipelines. Document, share with team, and get governance board approval.
+              7. Data security model — Design comprehensive data security model including classification scheme, access control strategy (RBAC/ABAC), encryption standards, network security, and audit requirements.
+              8. Reporting and visualization — Define reporting and visualization needs including KPIs, use cases, prototypes or mockups. Validate with business stakeholders.
+              9. DevOps — Define DevOps practices including CI/CD pipeline requirements, branching strategy, deployment automation, and test automation.
+              10. Cost estimate — Create cost estimate covering infrastructure, licensing, resource costs, and cloud consumption forecasts. Review with finance.
+            acceptance_criteria: |
+              • All deliverables are documented and stored in the agreed repository.
+              • Solution design is reviewed and approved by stakeholders and architecture board.
+              • Open decisions are resolved or logged with owners and target dates.
+
+          # -----------------------------------------------------------------
+          # Story: UAT Process
+          # -----------------------------------------------------------------
+          - title: "UAT Process"
+            story_points: 5
+            description: |
+              As a QA Lead, I want to define the UAT scope, roles, test strategy,
+              and procedures so that the team has a clear and agreed plan for
+              validating the solution before go-live.
+
+              Deliverables:
+              1. Define test roles — Identify roles for test execution, test management, and review. Document responsibilities and communicate to the project team.
+              2. Define test scope — Define what is in and out of scope for UAT, including which features, data flows, and integrations will be tested.
+              3. Create test strategy — Create a test strategy document covering test types (unit, integration, UAT, regression), approach, tools, schedule, and milestones.
+              4. Define test case template — Design a test case template with objective, input data, expected result, and pass/fail criteria. Ensure traceability to requirements.
+              5. Define entry and exit criteria — Specify the conditions for starting and completing UAT, including defect severity thresholds and sign-off requirements.
+            acceptance_criteria: |
+              • All deliverables are documented and stored in the agreed repository.
+              • Test strategy and scope are reviewed and approved by QA and business stakeholders.
+              • UAT entry and exit criteria are defined and communicated to the project team.
+
+          # -----------------------------------------------------------------
+          # Story: Organizational Anchoring
+          # -----------------------------------------------------------------
+          - title: "Organizational Anchoring"
+            story_points: 8
+            description: |
+              As a project lead, I want to define the change management, communication,
+              and adoption plan so that requirements, scope, and responsibilities for
+              organizational anchoring are clear before implementation begins.
+
+              Deliverables:
+              1. Change management plan — Define the change management approach including stakeholder analysis, impact assessment, communication channels, and timeline.
+              2. Documentation scope — Specify which business and technical documentation will be produced, who is responsible, and where it will be stored.
+              3. Training plan — Define the training plan covering target audiences (super-users, end-users), topics, format (live, recorded, self-service), schedule, and ownership.
+              4. Adoption metrics — Define how adoption and readiness will be measured, including KPIs (e.g., training completion, tool usage) and feedback mechanisms.
+            acceptance_criteria: |
+              • All deliverables are documented and stored in the agreed repository.
+              • Change management and training plans are reviewed and approved by stakeholders.
+              • Scope and responsibilities are clear and assigned to owners.
+
+      # =====================================================================
+      # Feature 2: Cloud Infrastructure (optional)
+      # =====================================================================
+      # Optional: some clients already have cloud infrastructure and DevOps
+      # practices in place. Include only if the client needs provisioning.
+      - title: "Infrastructure & DevOps"
+        optional: true
+        description: >
+          Implement and configure the underlying Azure infrastructure, CI/CD pipelines,
+          security, monitoring, and operational procedures for reliable deployment
+          and management. This feature is optional if the client already has
+          infrastructure provisioned.
+        stories:
+          - title: "Cloud Infrastructure"
+            story_points: 2
+            description: >
+              As a Cloud Engineer or Solution Architect, I want to provision and
+              configure the necessary Azure infrastructure, so that the data platform
+              components are secure, scalable, and ready for deployment.
+            acceptance_criteria: |
+              • Resource groups, storage accounts, and compute resources are created according to architecture specifications.
+              • Networking components (e.g., VNets, subnets, private endpoints) are configured securely.
+              • Infrastructure is provisioned using infrastructure-as-code (e.g., Bicep, Terraform).
+              • Azure Key Vault is set up for managing secrets and credentials.
+              • Role-based access control (RBAC) is applied to all resources.
+              • Monitoring and logging services (e.g., Azure Monitor, Log Analytics) are enabled.
+              • All configurations are documented and reviewed by relevant stakeholders.
+
+          - title: "DevOps CI/CD"
+            story_points: 1
+            description: >
+              As a DevOps Engineer, I want to set up DevOps repositories and CI/CD
+              pipelines, so that code and infrastructure can be version-controlled,
+              tested, and deployed automatically and reliably.
+            acceptance_criteria: |
+              • Git repositories are created and structured according to project standards.
+              • Branching strategy and naming conventions are defined and documented.
+              • CI/CD pipelines are configured for automated build, test, and deployment.
+              • Deployment environments (e.g., dev, test, prod) are defined and integrated into the pipeline.
+              • Service connections to Azure and other required platforms are configured and validated.
+
+          - title: "Databricks Lakehouse Framework"
+            story_points: 2
+            description: >
+              As a Data Engineer or Solution Architect, I want to set up the
+              foundational lakehouse framework in Azure Databricks, so that data can
+              be ingested, processed, and managed efficiently across bronze, silver,
+              and gold layers.
+            acceptance_criteria: |
+              • Workspace and cluster configurations are created according to performance and security requirements.
+              • Unity Catalog or Hive Metastore is configured for metadata and governance.
+              • Storage layers (bronze, silver, gold) are defined and connected to appropriate data sources.
+              • Service connections (e.g., to Azure Data Lake Storage, Key Vault, ADF) are configured and validated.
+              • Access controls and permissions are applied to clusters, notebooks, and data layers.
+
+          - title: "Fabric Lakehouse Framework"
+            story_points: 2
+            description: >
+              As a Data Engineer or Solution Architect, I want to set up the
+              foundational lakehouse framework in Microsoft Fabric, so that data can
+              be ingested, processed, and managed efficiently across bronze, silver,
+              and gold layers using Fabric-native capabilities.
+            acceptance_criteria: |
+              • Fabric workspace and lakehouse environment are provisioned and configured.
+              • Storage zones (bronze, silver, gold) are defined and aligned with medallion architecture principles.
+              • Pipelines or dataflows are created to support ingestion, transformation, and enrichment.
+              • Service connections to external sources (e.g., Azure Data Lake, SQL, APIs) are configured and validated.
+              • Access controls and permissions are applied to lakehouse assets.
+
+          - title: "Data Ingestion Framework"
+            story_points: 1
+            description: >
+              As a Data Engineer or Solution Architect, I want to set up the Azure
+              Data Factory framework, so that data pipelines can be developed,
+              managed, and executed efficiently and securely across environments.
+            acceptance_criteria: |
+              • ADF instance is provisioned and configured within the appropriate resource group.
+              • Linked services are created for all required data sources and destinations.
+              • Integration runtimes are configured for both cloud and hybrid connectivity.
+              • Pipelines are structured to support modular, reusable components.
+              • Parameterization is implemented for environment-specific configurations.
+              • Service connections and authentication mechanisms (e.g., Key Vault, managed identities) are set up and validated.
+              • Monitoring and logging are enabled using Azure Monitor and Log Analytics.
+              • Access control is applied using RBAC and security policies.
+
+          - title: "Documentation Wiki"
+            story_points: 1
+            description: >
+              As a Project Lead, I want to create and organize a DevOps documentation
+              wiki, so that project teams have a centralized and accessible reference
+              for all processes, tools, and standards.
+            acceptance_criteria: |
+              • Wiki is published and accessible for project team.
+
+      # =====================================================================
+      # Feature 3: Data Source Integration (parameterized)
+      # =====================================================================
+      # Duplicate this feature per source system, replacing {{name}} with
+      # the source system name (e.g., "SQL Server", "SAP", "Salesforce",
+      # "SharePoint", "365 Business Central", "365 CRM", etc.).
+      # Integrations are typically built using Azure Data Factory, Microsoft
+      # Fabric, or Azure Databricks.
+      - title: "Data Source Integration - {{name}}"
+        description: >
+          Build pipelines and processes to extract, transform, and load data from
+          {{name}} into the Lakehouse bronze/silver layers for downstream
+          processing. Pipelines may use Azure Data Factory, Microsoft Fabric,
+          or Azure Databricks depending on the chosen ingestion engine.
+        parameterized: true
+        optional: true
+        default_instances:
+          - "365 Business Central"
+          - "365 CRM"
+          - "SAP"
+          - "Salesforce"
+          - "SharePoint"
+        stories:
+          - title: "Data ingestion"
+            story_points: 3
+            description: >
+              As a data engineer, I want to implement ingestion pipelines to load data
+              from source systems into the Lakehouse, so that the raw and curated data
+              is available for downstream processing.
+            acceptance_criteria: |
+              • Ingestion pipelines created for all agreed data sources.
+              • Data is ingested into the Bronze layer with minimal transformations.
+              • Metadata (e.g., schema, data lineage) is captured and stored.
+              • Pipeline tested with both full load and incremental load scenarios.
+              • Documentation stored in the central repository (e.g., DevOps Wiki, Confluence).
+
+          - title: "Data refinement"
+            story_points: 3
+            description: >
+              As a data engineer, I want to develop transformations and cleaning logic,
+              so that data is standardized, deduplicated, and ready for analytics in
+              Silver/Gold layers.
+            acceptance_criteria: |
+              • Transformation logic applied to raw data (standardization, deduplication, cleansing).
+              • Processed data is stored in the Silver/Base layer according to design.
+              • Data quality checks (e.g., nulls, duplicates, schema validation) implemented.
+              • Processing validated with test datasets and sample queries.
+              • Documentation stored in the central repository (e.g., DevOps Wiki, Confluence).
+
+          - title: "Data quality & validation"
+            story_points: 3
+            description: >
+              As a data engineer, I want to implement data quality rules and validation
+              checks for {{name}} data, so that downstream consumers can trust the
+              accuracy, completeness, and consistency of the data.
+            acceptance_criteria: |
+              • Data quality rules defined in collaboration with data owners (completeness, accuracy, consistency, timeliness).
+              • Automated validation checks implemented in the pipeline (null checks, referential integrity, range checks, format validation).
+              • Data quality metrics are tracked and reported (e.g., % valid rows, % nulls, freshness SLA compliance).
+              • Failed records are quarantined and logged for review.
+              • Data profiling results are documented and shared with stakeholders.
+              • Documentation stored in the central repository (e.g., DevOps Wiki, Confluence).
+
+          - title: "Deployment & scheduling"
+            story_points: 1
+            description: >
+              As a platform engineer, I want ingestion and processing pipelines to be
+              deployed and scheduled, so that data flows automatically and consistently
+              according to business needs.
+            acceptance_criteria: |
+              • Pipelines deployed via CI/CD process (e.g., Azure DevOps, Databricks Asset Bundles).
+              • Scheduling configured in orchestration tool (e.g., ADF, Databricks Jobs, Fabric Pipeline).
+              • Pipelines run successfully according to defined schedule.
+              • Deployment verified in at least one non-production and one production environment.
+              • Documentation stored in the central repository (e.g., DevOps Wiki, Confluence).
+
+          - title: "Monitoring & alerting"
+            story_points: 2
+            description: >
+              As a platform engineer, I want to set up monitoring and alerting for
+              data pipelines, so that failures and anomalies are detected early and
+              resolved promptly.
+            acceptance_criteria: |
+              • Monitoring dashboards configured (e.g., Azure Monitor, Databricks, Log Analytics).
+              • Alerts set up for pipeline failures, delays, or data anomalies.
+              • Alerts tested to ensure notifications reach responsible team members.
+              • Runbook documented for handling common incidents.
+
+      # =====================================================================
+      # Feature 4: Data Modeling Layer (optional)
+      # =====================================================================
+      # Optional but usually required. Covers dimensional modeling (dimensions
+      # and facts) in the Gold layer following Kimball methodology. Data
+      # cleaning and quality assurance belong in Data Source Integration.
+      - title: "Data Modeling Layer"
+        optional: true
+        description: >
+          Design and build a dimensional model in the Lakehouse gold layer
+          following Kimball star schema methodology. Includes dimension tables
+          (slowly changing dimensions, surrogate keys, attribute modeling) and
+          fact tables (grain definition, measures, foreign key relationships).
+          Data cleaning and quality assurance are handled upstream in the Data
+          Source Integration feature.
+        stories:
+          - title: "Dimension - {{ name }}"
+            parameterized: true
+            instance_key: Dimension
+            default_instances:
+              - "Calendar"
+              - "Customer"
+              - "Product"
+              - "Supplier"
+              - "Employee"
+            story_points: 3
+            description: >
+              As a data modeler, I want to design and implement a {{ name }} Dimension,
+              so that business users can analyze sales and other facts by {{ name }}
+              attributes.
+            acceptance_criteria: |
+              • Business requirements are gathered and documented, including dimensionality and required attributes.
+              • Source-to-target mapping is documented in the bus matrix.
+              • Surrogate keys are created and natural key mappings are defined.
+              • Slowly changing dimension (SCD) strategy (Type 1, 2, etc.) is defined and implemented.
+              • Dimension attributes are clearly modeled with descriptive names and business-friendly labels.
+              • Pipelines are scheduled/orchestrated with deployment instructions documented in Azure DevOps wiki.
+              • Unit tests and/or validation queries confirm row counts, key uniqueness, and attribute correctness.
+              • Business definition and technical metadata (schema, column definitions, keys) are documented.
+              • Access permissions are implemented.
+              • The table is accessible and queryable for downstream analytics and BI consumption.
+
+          - title: "Fact - {{ name }}"
+            parameterized: true
+            instance_key: Fact
+            default_instances:
+              - "Sales"
+              - "Inventory"
+              - "Purchase Orders"
+            story_points: 5
+            description: >
+              As a data modeler, I want to design and implement a {{ name }} Fact table,
+              so that business users can analyze revenue, quantity, and related
+              measures across time, customer, and product.
+            acceptance_criteria: |
+              • Business requirements are gathered and documented, including grain, dimensionality, and required measures.
+              • Source-to-target mapping is documented in the bus matrix.
+              • Grain is clearly defined at the correct level of detail.
+              • Foreign keys to all relevant dimension tables are included and validated.
+              • Additive, semi-additive, and non-additive measures are modeled correctly.
+              • Pipelines are scheduled/orchestrated with deployment instructions documented in Azure DevOps wiki.
+              • Unit tests and/or validation queries confirm row counts, referential integrity, and measure accuracy.
+              • Business definition and technical metadata (schema, column definitions, keys) are documented.
+              • Access permissions are implemented.
+              • The table is accessible and queryable for downstream analytics and BI consumption.
+
+      # =====================================================================
+      # Feature 5: Semantic Layer (parameterized, optional)
+      # =====================================================================
+      # Optional but usually required when the delivery includes Power BI
+      # reports or similar BI tools. Built using Tabular Editor in Microsoft
+      # Fabric or using Databricks metric views.
+      - title: "Semantic Model - {{name}}"
+        description: >
+          Create a semantic model for {{name}} data, including measures, KPIs,
+          hierarchies, relationships, formatting, and security. Typically built
+          using Tabular Editor in Microsoft Fabric, but may also use Databricks
+          metric views depending on the platform.
+        parameterized: true
+        optional: true
+        default_instances:
+          - "Supply Chain"
+        stories:
+          - title: "Define measures and KPIs"
+            story_points: 5
+            description: >
+              As a BI developer, I want to define measures and KPIs in the Power BI
+              semantic model so that business users have consistent and standardized
+              calculations across reports.
+            acceptance_criteria: |
+              • All business-defined KPIs and measures are implemented using DAX.
+              • Measures follow naming conventions and best practices.
+              • Validations confirm results match business rules.
+              • Performance of measures optimized (no excessive query times).
+              • Documentation of measures/KPIs created in DevOps Wiki (or equivalent).
+
+          - title: "Build model relationships"
+            story_points: 3
+            description: >
+              As a BI developer, I want to build relationships in the semantic model
+              so that data from different tables can be queried together in a
+              meaningful way.
+            acceptance_criteria: |
+              • All required relationships between dimension and fact tables are created.
+              • Relationships have correct cardinality and direction.
+              • No circular dependencies exist.
+              • Model validation confirms relationships support intended queries.
+              • Relationship diagram documented.
+
+          - title: "Define model hierarchies"
+            story_points: 2
+            description: >
+              As a BI developer, I want to define hierarchies in the model so that
+              users can easily drill down into data (e.g., Year → Quarter → Month → Day).
+            acceptance_criteria: |
+              • Hierarchies created for time, geography, and other key dimensions.
+              • Drill-down works correctly in Power BI visuals.
+              • Hierarchy names follow naming standards.
+              • Tested with sample visuals to confirm correct navigation.
+              • Documented for business users.
+
+          - title: "Implement security model"
+            story_points: 8
+            description: >
+              As a BI developer, I want to add row-level security (RLS) so that users
+              only see the data they are authorized to view.
+            acceptance_criteria: |
+              • RLS roles are defined and implemented in Tabular Editor.
+              • Role membership configured for user groups.
+              • Security tested with sample user accounts.
+              • Unauthorized data access is prevented.
+              • RLS design documented for governance and compliance.
+
+          - title: "Deployment & scheduling"
+            story_points: 5
+            description: >
+              As a BI developer, I want to manage Deployment of the Semantic Model
+              so that it is published reliably and accessible to the intended users.
+            acceptance_criteria: |
+              • Model deployment process documented, including workspace setup and permissions.
+              • Semantic Model tested in development and staging environments before production.
+              • Refresh schedules configured and validated.
+              • Users can access the semantic model according to the defined governance rules.
+              • Deployment steps and changes documented in Azure DevOps (or equivalent).
+
+      # =====================================================================
+      # Feature 6: Presentation Layer (parameterized, optional)
+      # =====================================================================
+      # Duplicate this feature per report/dashboard/app. Presentations can
+      # include Power BI reports, Power BI dashboards, Databricks dashboards,
+      # Streamlit apps, or other presentation tools.
+      - title: "Presentation Layer - {{name}}"
+        description: >
+          Design and build an interactive presentation for {{name}} that
+          delivers KPIs, trends, and insights to business users. This may be
+          a Power BI report, Power BI dashboard, Databricks dashboard, Streamlit
+          app, or another presentation tool.
+        parameterized: true
+        optional: true
+        default_instances:
+          - "Supply Chain Insights"
+        stories:
+          - title: "Design company report template"
+            story_points: 3
+            description: >
+              As a BI developer, I want to design a company report template so that
+              all Power BI reports have a consistent and professional look aligned
+              with branding guidelines.
+            acceptance_criteria: |
+              • Template includes company colors, fonts, and logo.
+              • Layout accommodates standard headers, footers, and navigation elements.
+              • Template tested on multiple devices (desktop, tablet, mobile).
+              • Approved by business stakeholders or design team.
+              • Template stored in a shared repository for reuse.
+
+          - title: "Build report visualizations"
+            story_points: 8
+            description: >
+              As a BI developer, I want to build report visualizations so that
+              business users can gain insights through interactive charts, tables,
+              and KPIs.
+            acceptance_criteria: |
+              • All visuals are based on the defined semantic model.
+              • Visuals follow best practices for clarity and performance.
+              • Report filters, slicers, and navigation work as expected.
+              • Accessibility (color contrast, labels) verified.
+              • Report reviewed and approved by stakeholders before UAT.
+
+          - title: "Governance structure"
+            story_points: 3
+            description: >
+              As a BI developer, I want to define a Governance structure for the
+              Power BI report so that ownership, access, and maintenance
+              responsibilities are clear.
+            acceptance_criteria: |
+              • Roles and responsibilities for report creation, approval, and maintenance are documented.
+              • Access levels (view, edit, admin) are defined for user groups.
+              • Governance rules for data accuracy, versioning, and refresh schedules are documented.
+              • Documentation stored in Azure DevOps (or equivalent).
+              • Stakeholders review and approve the governance structure.
+
+          - title: "Deployment & scheduling"
+            story_points: 5
+            description: >
+              As a BI developer, I want to manage deployment of the Power BI report
+              so that it is published reliably and accessible to the intended users.
+            acceptance_criteria: |
+              • Report deployment process documented, including workspace setup and permissions.
+              • Report tested in development and staging environments before production.
+              • Refresh schedules configured and validated.
+              • Users can access the report according to the defined governance rules.
+              • Deployment steps and changes documented in Azure DevOps (or equivalent).
